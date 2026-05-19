@@ -4,185 +4,143 @@
 <meta charset="UTF-8">
 <title>Ticker TikTok</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Barlow+Condensed:wght@600;700;900&display=swap');
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    width: 1920px;
-    height: 1080px;
+  html, body {
+    width: 1080px;
+    height: 1920px;
     background: transparent;
     overflow: hidden;
   }
-
-  .ticker-wrapper {
+  canvas {
     position: absolute;
     bottom: 0;
     left: 0;
-    right: 0;
-    height: 80px;
-    display: flex;
-    align-items: stretch;
-    overflow: hidden;
   }
-
-  /* Label gauche */
-  .ticker-label {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 28px 0 24px;
-    background: #E8D5A3;
-    position: relative;
-    z-index: 2;
-  }
-
-  .ticker-label::after {
-    content: '';
-    position: absolute;
-    right: -20px;
-    top: 0;
-    bottom: 0;
-    width: 40px;
-    background: #E8D5A3;
-    clip-path: polygon(0 0, 60% 0, 100% 100%, 0 100%);
-    z-index: 1;
-  }
-
-  .ticker-label-dot {
-    width: 11px;
-    height: 11px;
-    border-radius: 50%;
-    background: #0A0A0C;
-    animation: blink-label 1.4s infinite;
-    flex-shrink: 0;
-  }
-
-  @keyframes blink-label {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  .ticker-label-text {
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700;
-    font-size: 18px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: #0A0A0C;
-    white-space: nowrap;
-  }
-
-  /* Corps */
-  .ticker-body {
-    flex: 1;
-    background: rgba(8, 8, 10, 0.92);
-    border-top: 2px solid rgba(232, 213, 163, 0.35);
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    align-items: center;
-    padding-left: 40px;
-  }
-
-  .ticker-track {
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    will-change: transform;
-    transform: translateX(0);
-  }
-
-  .ticker-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 18px;
-    padding-right: 80px;
-  }
-
-  .ticker-sep {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    background: rgba(232, 213, 163, 0.5);
-    border-radius: 50%;
-    margin-right: 80px;
-    flex-shrink: 0;
-  }
-
-  .ticker-icon {
-    font-size: 26px;
-    flex-shrink: 0;
-    color: #E8D5A3;
-  }
-
-  .ticker-text {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 34px;
-    color: #F0E6CC;
-    letter-spacing: 0.05em;
-    line-height: 1;
-  }
-
-  .ticker-text .highlight {
-    color: #E8D5A3;
-    font-weight: 900;
-    font-size: 38px;
-  }
-
 </style>
 </head>
 <body>
-
-<div class="ticker-wrapper">
-  <div class="ticker-label">
-    <div class="ticker-label-dot"></div>
-    <span class="ticker-label-text">TikTok</span>
-  </div>
-  <div class="ticker-body">
-    <div class="ticker-track" id="ticker-track"></div>
-  </div>
-</div>
-
+<canvas id="c"></canvas>
 <script>
-  const messages = [
-    { icon: '📷', text: 'Caméra Du BootCamp Entière Sur Mon Twitch : <span class="highlight">SixMikTw</span>' },
-    { icon: '🎮', text: 'Caméra Du BootCamp Entière Sur Mon Twitch : <span class="highlight">SixMikTw</span>' },
-    { icon: '🔴', text: 'Caméra Du BootCamp Entière Sur Mon Twitch : <span class="highlight">SixMikTw</span>' },
-    { icon: '⚡', text: 'Caméra Du BootCamp Entière Sur Mon Twitch : <span class="highlight">SixMikTw</span>' },
-  ];
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
 
-  function buildTicker() {
-    const track = document.getElementById('ticker-track');
-    const double = [...messages, ...messages];
-    track.innerHTML = double.map(msg => `
-      <span class="ticker-item">
-        <span class="ticker-icon">${msg.icon}</span>
-        <span class="ticker-text">${msg.text}</span>
-      </span>
-      <span class="ticker-sep"></span>
-    `).join('');
+  canvas.width  = 1080;
+  canvas.height = 110;
+  canvas.style.bottom = '0px';
 
-    // Attend que le DOM soit rendu pour mesurer
-    requestAnimationFrame(() => {
-      const halfWidth = track.scrollWidth / 2;
-      const speed = 1.4; // px par frame — augmente si trop lent
-      let pos = 0;
+  const MSG = 'Caméra Du BootCamp Entière Sur Mon Twitch : SixMikTw          ';
+  const SPEED = 2.5;
 
-      function tick() {
-        pos -= speed;
-        if (pos <= -halfWidth) pos = 0;
-        track.style.transform = `translateX(${pos}px)`;
-        requestAnimationFrame(tick);
+  // Couleurs
+  const BG        = 'rgba(8, 8, 10, 0.92)';
+  const LABEL_BG  = '#E8D5A3';
+  const TEXT_COL  = '#F0E6CC';
+  const HIGH_COL  = '#E8D5A3';
+  const BORDER    = 'rgba(232, 213, 163, 0.4)';
+
+  const LABEL_W   = 160;
+  const H         = 110;
+  const FONT_SIZE = 46;
+  const HIGH_WORD = 'SixMikTw';
+
+  // Mesure la largeur du texte complet
+  ctx.font = `700 ${FONT_SIZE}px Arial Narrow, Arial, sans-serif`;
+  const fullW = ctx.measureText(MSG).width;
+
+  let pos = LABEL_W + 40;
+
+  // Dot clignotant
+  let dotOn = true;
+  setInterval(() => { dotOn = !dotOn; }, 700);
+
+  function drawLabel() {
+    // Fond doré
+    ctx.fillStyle = LABEL_BG;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(LABEL_W + 20, 0);
+    ctx.lineTo(LABEL_W, H);
+    ctx.lineTo(0, H);
+    ctx.closePath();
+    ctx.fill();
+
+    // Dot
+    ctx.beginPath();
+    ctx.arc(22, H / 2, 7, 0, Math.PI * 2);
+    ctx.fillStyle = dotOn ? '#0A0A0C' : 'rgba(10,10,12,0.3)';
+    ctx.fill();
+
+    // Texte label
+    ctx.font = `700 20px Arial Narrow, Arial, sans-serif`;
+    ctx.fillStyle = '#0A0A0C';
+    ctx.letterSpacing = '3px';
+    ctx.fillText('TIKTOK', 36, H / 2 + 7);
+  }
+
+  function drawTicker() {
+    // Fond ticker
+    ctx.fillStyle = BG;
+    ctx.fillRect(LABEL_W, 0, canvas.width - LABEL_W, H);
+
+    // Bordure top
+    ctx.fillStyle = BORDER;
+    ctx.fillRect(LABEL_W, 0, canvas.width - LABEL_W, 2);
+
+    // Clip zone texte
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(LABEL_W + 10, 0, canvas.width - LABEL_W - 10, H);
+    ctx.clip();
+
+    ctx.font = `700 ${FONT_SIZE}px Arial Narrow, Arial, sans-serif`;
+    ctx.textBaseline = 'middle';
+
+    // Dessine le message en coloriant SixMikTw différemment
+    drawColoredText(MSG, pos, H / 2);
+
+    // Loop : redessine quand le premier passe hors écran
+    if (pos + fullW < canvas.width) {
+      drawColoredText(MSG, pos + fullW, H / 2);
+    }
+
+    ctx.restore();
+  }
+
+  function drawColoredText(text, startX, y) {
+    const parts = text.split(HIGH_WORD);
+    let x = startX;
+    ctx.font = `700 ${FONT_SIZE}px Arial Narrow, Arial, sans-serif`;
+
+    parts.forEach((part, i) => {
+      ctx.fillStyle = TEXT_COL;
+      ctx.fillText(part, x, y);
+      x += ctx.measureText(part).width;
+
+      if (i < parts.length - 1) {
+        ctx.fillStyle = HIGH_COL;
+        ctx.font = `900 ${FONT_SIZE + 6}px Arial Narrow, Arial, sans-serif`;
+        ctx.fillText(HIGH_WORD, x, y);
+        x += ctx.measureText(HIGH_WORD).width;
+        ctx.font = `700 ${FONT_SIZE}px Arial Narrow, Arial, sans-serif`;
       }
-
-      requestAnimationFrame(tick);
     });
   }
 
-  buildTicker();
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawTicker();
+    drawLabel();
+
+    pos -= SPEED;
+    if (pos + fullW < LABEL_W + 10) {
+      pos = canvas.width;
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  loop();
 </script>
 </body>
 </html>
