@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Ticker TikTok</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Barlow+Condensed:wght@600;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1920px;
+    height: 1080px;
+    background: transparent;
+    overflow: hidden;
+  }
+
+  .ticker-wrapper {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  /* Label gauche */
+  .ticker-label {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 28px 0 24px;
+    background: #E8D5A3;
+    position: relative;
+    z-index: 2;
+  }
+
+  .ticker-label::after {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    background: #E8D5A3;
+    clip-path: polygon(0 0, 60% 0, 100% 100%, 0 100%);
+    z-index: 1;
+  }
+
+  .ticker-label-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #0A0A0C;
+    animation: blink-label 1.4s infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes blink-label {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .ticker-label-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #0A0A0C;
+    white-space: nowrap;
+  }
+
+  /* Corps */
+  .ticker-body {
+    flex: 1;
+    background: rgba(8, 8, 10, 0.92);
+    border-top: 2px solid rgba(232, 213, 163, 0.35);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding-left: 40px;
+  }
+
+  .ticker-track {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    animation: scroll-ticker 35s linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes scroll-ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    padding-right: 80px;
+  }
+
+  .ticker-sep {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: rgba(232, 213, 163, 0.5);
+    border-radius: 50%;
+    margin-right: 80px;
+    flex-shrink: 0;
+  }
+
+  .ticker-icon {
+    font-size: 26px;
+    flex-shrink: 0;
+    color: #E8D5A3;
+  }
+
+  .ticker-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 34px;
+    color: #F0E6CC;
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+
+  .ticker-text .highlight {
+    color: #E8D5A3;
+    font-weight: 900;
+    font-size: 38px;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="ticker-wrapper">
+  <div class="ticker-label">
+    <div class="ticker-label-dot"></div>
+    <span class="ticker-label-text">TikTok</span>
+  </div>
+  <div class="ticker-body">
+    <div class="ticker-track" id="ticker-track"></div>
+  </div>
+</div>
+
+<script>
+  const messages = [
+    { icon: '📷', text: 'Caméra Du BootCamp Entière Sur Mon Twitch : <span class="highlight">SixMikTw</span>' },
+    { icon: '🎮', text: 'Caméra Du BootCamp Entière Sur Mon Twitch : <span class="highlight">SixMikTw</span>' },
+    { icon: '🔴', text: 'Caméra Du BootCamp Entière Sur Mon Twitch : <span class="highlight">SixMikTw</span>' },
+    { icon: '⚡', text: 'Caméra Du BootCamp Entière Sur Mon Twitch : <span class="highlight">SixMikTw</span>' },
+  ];
+
+  function buildTicker() {
+    const track = document.getElementById('ticker-track');
+    const double = [...messages, ...messages];
+    track.innerHTML = double.map(msg => `
+      <span class="ticker-item">
+        <span class="ticker-icon">${msg.icon}</span>
+        <span class="ticker-text">${msg.text}</span>
+      </span>
+      <span class="ticker-sep"></span>
+    `).join('');
+
+    const trackWidth = track.scrollWidth / 2;
+    const duration = trackWidth / 180;
+    track.style.animation = `scroll-ticker ${duration}s linear infinite`;
+  }
+
+  buildTicker();
+</script>
+</body>
+</html>
