@@ -90,13 +90,8 @@
     display: flex;
     align-items: center;
     white-space: nowrap;
-    animation: scroll-ticker 35s linear infinite;
     will-change: transform;
-  }
-
-  @keyframes scroll-ticker {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    transform: translateX(0);
   }
 
   .ticker-item {
@@ -170,9 +165,21 @@
       <span class="ticker-sep"></span>
     `).join('');
 
-    const trackWidth = track.scrollWidth / 2;
-    const duration = trackWidth / 180;
-    track.style.animation = `scroll-ticker ${duration}s linear infinite`;
+    // Attend que le DOM soit rendu pour mesurer
+    requestAnimationFrame(() => {
+      const halfWidth = track.scrollWidth / 2;
+      const speed = 1.4; // px par frame — augmente si trop lent
+      let pos = 0;
+
+      function tick() {
+        pos -= speed;
+        if (pos <= -halfWidth) pos = 0;
+        track.style.transform = `translateX(${pos}px)`;
+        requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+    });
   }
 
   buildTicker();
